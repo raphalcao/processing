@@ -8,8 +8,14 @@ use App\Models\User;
 use Carbon\Carbon;
 
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository extends AbstractRepository implements UserRepositoryInterface
 {
+
+    public function __construct()
+    {
+        $this->model = User::class;
+    }
+
     /**
      * Insere um novo usuário no banco de dados.
      *
@@ -36,9 +42,16 @@ class UserRepository implements UserRepositoryInterface
             return 'error inserting user: ' . $e->getMessage();
         }
     }
-    public function find(string $email)
+    
+    public function findByEmail(string $email)
     {
-        return User::where('email', $email)->first();
+        return $this->find('email', $email);
+    }
+
+    
+    public function findBytoken(string $token)
+    {
+        return $this->find('token', $token);
     }
 
     /**
@@ -51,7 +64,7 @@ class UserRepository implements UserRepositoryInterface
     public function update(string $email, $response): void
     {
         try {
-            $user = $this->find($email);
+            $user = $this->findByEmail($email);
 
             if (!$user) {
                 throw new \Exception("User with email {$email} not found.");
@@ -67,4 +80,5 @@ class UserRepository implements UserRepositoryInterface
             throw new \Exception('error updating user: ' . $e->getMessage());
         }
     }
+
 }
