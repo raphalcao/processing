@@ -19,11 +19,13 @@ interface UserRepositoryInterface
     public function insert(string $cognitoUserId, string $email, string $password, string $name, Result $response): string;
 
     /**
-     * Localiza o usuário no banco de dados.
+     * Encontra um registro pelo campo e valor fornecidos.
      *
-     * @param string $email O email do usuário.
+     * @param string $field O campo a ser pesquisado.
+     * @param mixed $value O valor do campo.
+     * @return mixed
      */
-    public function find(string $email);
+    public function find(string $field, $value);
 
     /**
      * Atualiza os dados de acesso do usuário no banco de dados.
@@ -33,4 +35,11 @@ interface UserRepositoryInterface
      * @return void
      */
     public function update(string $email, Result $response): void;
+
+    /**
+     * Localiza o usuário no banco de dados.
+     *
+     * @param token $token O token do usuário.
+     */
+    public function findBytoken(string $token);
 }
