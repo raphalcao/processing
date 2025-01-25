@@ -1,0 +1,36 @@
+services:
+
+    php:
+        container_name: php
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile
+        ports:
+            - 8100:80
+        volumes:
+            - ./:/var/www/html
+            - ./docker/php/php.ini:/usr/local/etc/conf.d/custom.ini
+        depends_on:
+            mysql:
+                condition: service_healthy
+
+    mysql:
+        container_name: mysql
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - 3307:3306
+        environment:      
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"        
+            MYSQL_ROOT_HOST: "%%"
+            MYSQL_DATABASE: '${DB_DATABASE:-auth}'
+            MYSQL_USER: '${DB_USERNAME:-root}'
+            MYSQL_PASSWORD: '${DB_PASSWORD:-123456}'                      
+        volumes:
+            - './my.cnf:/etc/mysql/my.cnf'
+            - './docker/database/volumes/mysql/:/var/lib/mysql'
+        healthcheck:
+            test:
+                ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            retries: 20
+            timeout: 10s
+            interval: 30s
