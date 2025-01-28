@@ -42,13 +42,13 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             return 'error inserting user: ' . $e->getMessage();
         }
     }
-    
+
     public function findByEmail(string $email)
     {
         return $this->find('email', $email);
     }
 
-    
+
     public function findBytoken(string $token)
     {
         return $this->find('token', $token);
@@ -80,5 +80,4 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             throw new \Exception('error updating user: ' . $e->getMessage());
         }
     }
-
 }

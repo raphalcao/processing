@@ -30,10 +30,14 @@ class CheckTokenExpiration
         $token = $request->header('Authorization');
         $user = $this->userRepositoryInterface->findBytoken($token);
 
+        if (!$user) return response()->json([
+            'error' => 'User not found.'
+        ], 404, ['Content-Type' => 'application/json']);
+
         if ($user && $user->expired_date->isPast()) {
             $expiredDate = Carbon::parse($user->expired_date);
             if ($expiredDate->isPast()) {
-                throw new HttpException(404, 'O token está expirado.');
+                throw new HttpException(404, 'The token is expired.');
             }
         }
 
