@@ -30,13 +30,26 @@ class VideoProcessingService
             $ffmpeg = \FFMpeg\FFMpeg::create();
             $video = $ffmpeg->open($videoFullPath);
 
-            $video->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds(1))
-                ->save("$framesDirectory/frame1.jpg");
-            $video->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds(2))
-                ->save("$framesDirectory/frame2.jpg");
+            $ffprobe = \FFMpeg\FFProbe::create();
+            $duration = $ffprobe->format($videoFullPath)->get('duration');
 
+            if (!$duration) {
+                throw new \Exception("Could not retrieve video duration.");
+            }
+
+            for ($second = 0; $second <= $duration; $second += 5) {
+                $frameFileName = "$framesDirectory/frame_$second.jpg";
+                $video->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds($second))->save($frameFileName);
+            }
+
+            if ($duration % 5 !== 0) {
+                $lastFrameFileName = "$framesDirectory/frame_last.jpg";
+                $video->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds((int)$duration))->save($lastFrameFileName);
+            }
+
+            $dateTime = date('YmdHis');
             $zip = new \ZipArchive();
-            $zipFileName = storage_path(self::PRIVATE_DIRECTORY . "/frames.zip");
+            $zipFileName = storage_path(self::PRIVATE_DIRECTORY . "/frames_$dateTime.zip");
 
             if ($zip->open($zipFileName, \ZipArchive::CREATE) === true) {
                 foreach (glob("$framesDirectory/*.jpg") as $frame) {
