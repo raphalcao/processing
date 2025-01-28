@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Storage;
 
 class VideoProcessingService
 {
+    private const PRIVATE_DIRECTORY = "app/private";
+
     public function processVideo($videoFile)
     {
         if (!Storage::disk('local')->exists('videos')) {
@@ -13,13 +15,13 @@ class VideoProcessingService
         }
 
         $videoPath = $videoFile->store('videos', 'local');
-        $videoFullPath = str_replace('/', DIRECTORY_SEPARATOR, storage_path("app/private/$videoPath"));
+        $videoFullPath = str_replace('/', DIRECTORY_SEPARATOR, storage_path(self::PRIVATE_DIRECTORY . "/$videoPath"));
 
         if (!file_exists($videoFullPath)) {
-            throw new \Exception("Arquivo de vídeo não encontrado em $videoFullPath");
+            throw new \Exception("Video file not found in $videoFullPath");
         }
 
-        $framesDirectory = storage_path('app/private/frames');
+        $framesDirectory = storage_path(self::PRIVATE_DIRECTORY . "/frames");
         if (!file_exists($framesDirectory)) {
             mkdir($framesDirectory, 0777, true);
         }
@@ -34,7 +36,7 @@ class VideoProcessingService
                 ->save("$framesDirectory/frame2.jpg");
 
             $zip = new \ZipArchive();
-            $zipFileName = storage_path('app/private/frames.zip');
+            $zipFileName = storage_path(self::PRIVATE_DIRECTORY . "/frames.zip");
 
             if ($zip->open($zipFileName, \ZipArchive::CREATE) === true) {
                 foreach (glob("$framesDirectory/*.jpg") as $frame) {
@@ -42,7 +44,7 @@ class VideoProcessingService
                 }
                 $zip->close();
             } else {
-                throw new \Exception("Falha ao criar o arquivo ZIP.");
+                throw new \Exception("Failed to create file ZIP.");
             }
 
             Storage::deleteDirectory('private/frames');
