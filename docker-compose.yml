@@ -1,7 +1,7 @@
 services:
 
     php:
-        container_name: php
+        container_name: processing
         build:
             context: .
             dockerfile: ./docker/Dockerfile
@@ -18,7 +18,7 @@ services:
         container_name: mysql
         image: 'mysql/mysql-server:8.0'
         ports:
-            - 3307:3306
+            - 3306:3306
         environment:      
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"        
             MYSQL_ROOT_HOST: "%%"
