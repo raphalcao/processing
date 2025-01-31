@@ -11,7 +11,7 @@
 ## Passo a passo para inicialização da aplicação
 
 ### Se tiver o Make instalado
-# OBS: No Windows, abrir o terminal WSL do VSCODE.
+### OBS: No Windows, abrir o terminal WSL do VSCODE.
 
 Use os commandos: 
 
