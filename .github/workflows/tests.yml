@@ -31,8 +31,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-          coverage: none
+          extensions: xdebug, dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: xdebug
+
+      - name: Debug PHP Extensions
+        run: php -m | grep xdebug
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -48,5 +51,5 @@ jobs:
           mkdir -p database
           touch database/database.sqlite
 
-      - name: Run PHPUnit tests
+      - name: Run PHPUnit tests with coverage
         run: vendor/bin/phpunit --coverage-html coverage/
