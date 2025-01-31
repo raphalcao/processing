@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckTokenExpiration;
+use App\Http\Controllers\VideoController;
 
 
 /*
@@ -16,9 +17,5 @@ use App\Http\Middleware\CheckTokenExpiration;
 */
 
 Route::middleware([CheckTokenExpiration::class])->group(function () {
-    Route::get('/protected-route', function () {
-        return response()->json(['message' => 'Você tem acesso a esta rota.']);
-    });
+    Route::post('/process-video', [VideoController::class, 'processVideo']);  
 });
-
-
