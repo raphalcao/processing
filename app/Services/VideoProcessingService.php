@@ -7,7 +7,7 @@ use App\Services\{
     ProcessStatusService
 };
 
-use Illuminate\Support\Facades\Auth;
+use App\Services\Support\VideoProcessEnum;
 use Illuminate\Support\Facades\Storage;
 
 class VideoProcessingService
@@ -25,9 +25,10 @@ class VideoProcessingService
         $this->processStatusService = $processStatusService;
     }
 
+    //  $table->enum('status', ['start', 'finished', 'error'])->default('start');
     public function processVideo($videoFile)
     {
-        $this->processStatusService->saveProcessStatus('Starting the process video');
+        $this->processStatusService->saveProcessStatus(VideoProcessEnum::START_PROCESS, VideoProcessEnum::START);
         if (!Storage::disk('local')->exists('videos')) {
             Storage::disk('local')->makeDirectory('videos');
         }
