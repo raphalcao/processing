@@ -2,14 +2,32 @@
 
 namespace App\Services;
 
+use App\Services\{
+    LogService,
+    ProcessStatusService
+};
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class VideoProcessingService
 {
     private const PRIVATE_DIRECTORY = "app/private";
 
+    private LogService $logService;
+    private ProcessStatusService $processStatusService;
+
+    public function __construct(
+        LogService $logService,
+        ProcessStatusService $processStatusService
+    ) {
+        $this->logService = $logService;
+        $this->processStatusService = $processStatusService;
+    }
+
     public function processVideo($videoFile)
     {
+        $this->processStatusService->saveProcessStatus('Starting the process video');
         if (!Storage::disk('local')->exists('videos')) {
             Storage::disk('local')->makeDirectory('videos');
         }
