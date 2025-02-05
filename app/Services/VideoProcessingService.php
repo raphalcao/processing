@@ -2,17 +2,23 @@
 
 namespace App\Services;
 
+
 use App\Services\{
     LogService,
     ProcessStatusService
 };
 
-use App\Services\Support\VideoProcessEnum;
 use Illuminate\Support\Facades\Storage;
 
 class VideoProcessingService
 {
     private const PRIVATE_DIRECTORY = "app/private";
+    public const START = 'start';
+    public const FINISHED = 'finished';
+    public const ERROR = 'error';
+    public const START_PROCESS = 'starting process';
+    public const PROCESS_FINISHED = 'process finished';
+    public const FAILED_PROCESS = 'error in process execution';
 
     private LogService $logService;
     private ProcessStatusService $processStatusService;
@@ -25,10 +31,9 @@ class VideoProcessingService
         $this->processStatusService = $processStatusService;
     }
 
-    //  $table->enum('status', ['start', 'finished', 'error'])->default('start');
     public function processVideo($videoFile)
     {
-        $this->processStatusService->saveProcessStatus(VideoProcessEnum::START_PROCESS, VideoProcessEnum::START);
+        $this->processStatusService->saveProcessStatus(self::START, self::START_PROCESS);
         if (!Storage::disk('local')->exists('videos')) {
             Storage::disk('local')->makeDirectory('videos');
         }
@@ -37,6 +42,7 @@ class VideoProcessingService
         $videoFullPath = str_replace('/', DIRECTORY_SEPARATOR, storage_path(self::PRIVATE_DIRECTORY . "/$videoPath"));
 
         if (!file_exists($videoFullPath)) {
+            $this->processStatusService->saveProcessStatus(self::ERROR, "Video file not found in $videoFullPath");
             throw new \Exception("Video file not found in $videoFullPath");
         }
 
@@ -53,6 +59,7 @@ class VideoProcessingService
             $duration = $ffprobe->format($videoFullPath)->get('duration');
 
             if (!$duration) {
+                $this->processStatusService->saveProcessStatus(self::ERROR, "Could not retrieve video duration.");
                 throw new \Exception("Could not retrieve video duration.");
             }
 
@@ -76,14 +83,16 @@ class VideoProcessingService
                 }
                 $zip->close();
             } else {
+                $this->processStatusService->saveProcessStatus(self::ERROR, "Failed to create file ZIP.");
                 throw new \Exception("Failed to create file ZIP.");
             }
 
             Storage::deleteDirectory('private/frames');
             Storage::delete($videoPath);
-
+            $this->processStatusService->saveProcessStatus(self::FINISHED, self::PROCESS_FINISHED);
             return $zipFileName;
         } catch (\Exception $e) {
+            $this->processStatusService->saveProcessStatus(self::ERROR, "Error.");
             Storage::deleteDirectory('private/frames');
             Storage::delete($videoPath);
             throw $e;
